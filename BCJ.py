@@ -60,9 +60,9 @@ def optimize_BCJ(q, z, R, W, max_trials, verb=True):
     # success probability
     { 'type' : 'eq', 'fun' :  BCJ(lambda x : Niter(R,W,x.L,x.p0) - x.niter)},
     # number of representations
-    { 'type' : 'eq', 'fun' :   BCJ(lambda x : ReprNum(R, x.L, x.p2, x.a3, x.m2, 0.0, 0.0, Z) - x.r2)},
-    { 'type' : 'eq', 'fun' :   BCJ(lambda x : ReprNum(R, x.L, x.p1, x.a2, x.m1, 0.0, 0.0, Z) - x.r1)},
-    { 'type' : 'eq', 'fun' :   BCJ(lambda x : ReprNum(R, x.L, x.p0, x.a1,  0.0, 0.0, 0.0, Z) - x.r0)},
+    { 'type' : 'eq', 'fun' :   BCJ(lambda x : ReprBCJ(R, x.L, x.p2, x.a3, x.m2, Z) - x.r2)},
+    { 'type' : 'eq', 'fun' :   BCJ(lambda x : ReprBCJ(R, x.L, x.p1, x.a2, x.m1, Z) - x.r1)},
+    { 'type' : 'eq', 'fun' :   BCJ(lambda x : ReprBCJ(R, x.L, x.p0, x.a1,  0.0, Z) - x.r0)},
     { 'type' : 'ineq', 'fun' : BCJ(lambda x : x.r1  - x.r2)},
     { 'type' : 'ineq', 'fun' : BCJ(lambda x : x.r0  - x.r1)}, # r1 <= r0
     { 'type' : 'ineq', 'fun' : BCJ(lambda x : Q*x.L - x.r0)}, # r0 <= Q*L

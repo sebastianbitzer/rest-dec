@@ -75,15 +75,42 @@ def Lsize(R,L,P,M,Z):
     L: red small instance
     P: small instance
     """
-    Num = (R+L) * trinom(P/(R+L),M/(R+L)) + Z*P
+    Num = (R+L) * trinom(P/(R+L),M/(R+L)) + Z*(P+M) 
 
-    if      Z == 1:         Num +=   1*M
-    elif    Z == 2:         Num +=   2*M
-    elif    Z == log(6,2):  Num +=  10*M # z = 6 does not use E_+
+    if    Z == log(6,2):  Num +=  10*M # E = E_+ for z = 6
 
     return Num
     
-def ReprNum(R,L, P, E, M, B, D, Z):
+def ReprNum(R,L, P, E, M, B, C, D, Z):
+    """
+    intermediate list sizes for BJMM2
+    R: rate
+    L: redundancy of small instance
+    P: weight after merge
+    E: number of overlaps to 0
+    M: elements from E_+ after merge
+    B: overlaps E_+ and E
+    D: overlaps E and E
+    """
+    repr = 0
+    if M > C > 0: 
+        repr = M*trinom(C/M, (1-C/M)/2) 
+        if Z == 2 or Z == log(6,2): repr += C
+
+    t = R+L-P-M
+    if t > 0.0: repr += t*hbin(E/t) + Z*E 
+
+    if P > 0.0 and 2*D + 2*B <= P:  
+        if  Z == 1 or Z == 2:  repr += P + P*hbin(2*B/P) 
+        elif   Z == log(6,2):  repr += P* trinom(2*D/P, 0.5-D/P)#P*hbin(P1/P) + P1*hbin( 2*D/P1) #+ 2*(P/2-D)*hbin(B/(P/2-D))
+        
+        if      Z == 1:            repr +=    0*B - 10*D # z = 2 does not have add. structure in E 
+        elif    Z == 2:            repr +=    2*B - 10*D # z = 4 does not have add. structure in E
+        #elif    Z == log(6,2):     repr +=    2*B +  2*D 
+        elif    Z == log(6,2):     repr +=  -10*B +  2*D # z = 6 does have additive structure (and we use E_+)
+    return repr
+
+def ReprBCJ(R,L, P, E, M, Z):
     """
     intermediate list sizes for BJMM2
     R: rate
@@ -92,16 +119,9 @@ def ReprNum(R,L, P, E, M, B, D, Z):
     E: number of overlaps to 0
     M: elements from E_+ after merge
     """
-    repr = M
+    repr = M + P
     t = R+L-P-M
-    if t > 0.0: 
-        if Z == 0:  repr += t*hbin(2*E/t) + 2*E
-        else:       repr += t*hbin(E/t) + Z*E
-    if P > 0.0 and 2*D + 2*B <= P:      
-        repr += P + P*trinom(2*D/P, 2*B/P) 
-        if      Z == 1:            repr +=    0*B - 10*D # z = 2 does not have add. structure in E 
-        elif    Z == 2:            repr +=    2*B - 10*D # z = 4 does not have add. structure in E
-        elif    Z == log(6,2):     repr += - 10*B +  2*D # z = 6 does not use E_+
+    if t > 0.0: repr += t*hbin(2*E/t) + 2*E
     return repr
 
 

@@ -65,23 +65,39 @@ def make_table(max_trials, num_iter, verb=False):
 
         for _ in range(num_iter):
             if z == 2 and W == 1.0:
-                Cost_BCJ, _, success = optimize_BCJ(q, z, R, W, max_trials, verb)
+                Cost_BCJ, adic, success = optimize_BCJ(q, z, R, W, max_trials, False)
                 if success and Cost_BCJ < Cost_opt:
                     Cost_opt = Cost_BCJ
-                    num_lvl = 2
+                    num_lvl = 3
+                    if verb:
+                        print("== BCJ is best ==")
+                        for t in adic:
+                            print(t, round_to_str(adic[t]) )
             else:
-                Cost2, _, success2 = optimize_BJMM2(q, z, R, W, max_trials, verb)
+                Cost2, adic, success2 = optimize_BJMM2(q, z, R, W, max_trials, False)
                 if success2 and Cost2 < Cost_opt:
                     Cost_opt = Cost2
                     num_lvl = 2
+                    if verb:
+                        print("== 2 is best ==")
+                        for t in adic:
+                            print(t, round_to_str(adic[t]) )
 
-                Cost3, _, success3 = optimize_BJMM3(q, z, R, W, max_trials, verb)
+                Cost3, adic, success3 = optimize_BJMM3(q, z, R, W, max_trials, False)
                 if success3 and Cost3 < Cost_opt:
                     Cost_opt = Cost3
                     num_lvl = 3
+                    if verb:
+                        print("== 3 is best ==")
+                        for t in adic:
+                            print(t, round_to_str(adic[t]) )
         
-        print(f'z={z}, q={q}, n={n}, R={R}, W={W}, claim={claim}, BJMM_+({num_lvl})={round_to_str(Cost_opt*n)} ({round_to_str(Cost_opt)})')
-        print('-------------------------------------------------------------------')
+        if z == 2 and W == 1.0:
+            print(f'z={z}, q={q}, n={n}, R={R}, W={W}, claim={claim}, BCJ({num_lvl})={round_to_str(Cost_opt*n)} ({round_to_str(Cost_opt)})')
+            print('-------------------------------------------------------------------')
+        else:
+            print(f'z={z}, q={q}, n={n}, R={R}, W={W}, claim={claim}, BJMM_+({num_lvl})={round_to_str(Cost_opt*n)} ({round_to_str(Cost_opt)})')
+            print('-------------------------------------------------------------------')
 
 
 ###################
@@ -90,9 +106,9 @@ def make_table(max_trials, num_iter, verb=False):
 q = 157
 R = 0.5
 max_trials = 100
-prec = 5 #25
-num_iter = 1
-verb=False
+prec = 5
+num_iter = 5
+verb = False
 num_lvl = 3
 
 # plot for z = 2
@@ -114,5 +130,5 @@ make_plot_over_wt(num_lvl,q, z, R, max_trials, prec, num_iter, verb)
 # reproduce table #
 ###################
 print('----------------------- Parameter Table ---------------------------')
-make_table(max_trials, num_iter, verb)
+make_table(max_trials, num_iter, False)
 

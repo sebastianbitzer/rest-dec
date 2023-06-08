@@ -13,7 +13,7 @@ authors:
 
 from macros import *
 
-set_BJMM2 = collections.namedtuple('BJMM2', 'L p0 p1 p2 m1 m2 e1 e2 d1 d2 b1 b2 l0 l1 l2 l3 niter r0 r1')
+set_BJMM2 = collections.namedtuple('BJMM2', 'L p0 p1 p2 m1 m2 e1 e2 c2 d1 d2 b1 b2 l0 l1 l2 l3 niter r0 r1')
 def BJMM2(f) : return wrap(f,set_BJMM2)
 
 scale = 3000
@@ -47,16 +47,17 @@ def optimize_BJMM2(q, z, R, W, max_trials, verb=True):
     { 'type' : 'ineq', 'fun' : BJMM2(lambda x : R + x.L - x.p1 - x.e2 - x.m1)},
     { 'type' : 'ineq', 'fun' : BJMM2(lambda x : x.p0/2 - x.d1 - x.m1)},
     { 'type' : 'ineq', 'fun' : BJMM2(lambda x : x.p1/2 - x.d2 - x.m2)},
+    { 'type' : 'ineq', 'fun' : BJMM2(lambda x : x.m1 - x.c2)},
     # parameters
-    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : x.p0/2 + x.e1 + x.d1  - x.p1)}, 
-    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : x.p1/2 + x.e2 + x.d2  - x.p2)},
+    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : x.p0/2        + x.e1 + x.d1  - x.p1)}, 
+    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : x.p1/2 + x.c2 + x.e2 + x.d2  - x.p2)},
     { 'type' : 'eq', 'fun' :   BJMM2(lambda x :            x.b1 - x.m1)}, 
-    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : (x.m1)/2 + x.b2 - x.m2)}, 
+    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : (x.m1 - x.c2)/2 + x.b2 - x.m2)}, 
     # number of iterations
     { 'type' : 'eq', 'fun' :  BJMM2(lambda x : Niter(R,W,x.L,x.p0) - x.niter)},
     # number of representations 
-    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : ReprNum(R,x.L, x.p1, x.e2, x.m1, x.b2, x.d2, Z) - x.r1)},
-    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : ReprNum(R,x.L, x.p0, x.e1, 0.0 , x.b1, x.d1, Z) - x.r0)},
+    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : ReprNum(R,x.L, x.p1, x.e2, x.m1, x.b2, x.c2, x.d2, Z) - x.r1)},
+    { 'type' : 'eq', 'fun' :   BJMM2(lambda x : ReprNum(R,x.L, x.p0, x.e1, 0.0 , x.b1,  0.0, x.d1, Z) - x.r0)},
     { 'type' : 'ineq', 'fun' : BJMM2(lambda x : Q*x.L - x.r0)}, # r0 <= Q*L
     { 'type' : 'ineq', 'fun' : BJMM2(lambda x : x.r0  - x.r1)},
     # list sizes
@@ -66,7 +67,7 @@ def optimize_BJMM2(q, z, R, W, max_trials, verb=True):
     { 'type' : 'eq', 'fun' : BJMM2(lambda x : 2*x.l1                + x.r0 - Q*x.L - x.l0 )}, # final list
     ]
 
-    bounds = [(0, 1-R)]+[(max(0, W-(1-R)), W)]   + [(0,W)]*2 + [(0,1)]*8 + [(0,10)]*7
+    bounds = [(0, 1-R)]+[(max(0, W-(1-R)), W)]   + [(0,W)]*2 + [(0,1)]*9 + [(0,10)]*7
     start = [0]*len(bounds)
     for l in range(len(bounds)): # randomize starting point
         start[l] = np.random.uniform(bounds[l][0],bounds[l][1])

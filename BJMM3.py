@@ -13,7 +13,7 @@ authors:
 
 from macros import *
 
-set_BJMM3 = collections.namedtuple('BJMM3', 'L p0 p1 p2 p3 m1 m2 m3 e1 e2 e3 d1 d2 d3 b1 b2 b3 l0 l1 l2 l3 l4 niter r0 r1 r2')
+set_BJMM3 = collections.namedtuple('BJMM3', 'L p0 p1 p2 p3 m1 m2 m3 e1 e2 e3 c2 c3 d1 d2 d3 b2 b3 l0 l1 l2 l3 l4 niter r0 r1 r2')
 def BJMM3(f) : return wrap(f,set_BJMM3)
 
 scale = 3000
@@ -51,19 +51,20 @@ def optimize_BJMM3(q, z, R, W, max_trials, verb=True):
     { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.p0/2 - x.d1 - x.m1)},
     { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.p1/2 - x.d2 - x.m2)},
     { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.p2/2 - x.d3 - x.m3)},
+    { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.m1 - x.c2)},
+    { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.m2 - x.c3)},
     # parameters
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : x.p0/2 + x.e1 + x.d1  - x.p1)}, 
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : x.p1/2 + x.e2 + x.d2  - x.p2)},
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : x.p2/2 + x.e3 + x.d3  - x.p3)},
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x :            x.b1 - x.m1)}, 
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : (x.m1)/2 + x.b2 - x.m2)}, 
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : (x.m2)/2 + x.b3 - x.m3)}, 
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : x.p0/2        + x.e1 + x.d1  - x.p1)}, 
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : x.p1/2 + x.c2 + x.e2 + x.d2  - x.p2)},
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : x.p2/2 + x.c3 + x.e3 + x.d3  - x.p3)}, 
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : (x.m1 - x.c2)/2 + x.b2 - x.m2)}, 
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : (x.m2 - x.c3)/2 + x.b3 - x.m3)}, 
     # number of iterations
     { 'type' : 'eq', 'fun' :  BJMM3(lambda x : Niter(R,W,x.L,x.p0) - x.niter)},
     # number of representations 
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : ReprNum(R, x.L, x.p2, x.e3, x.m2, x.b3, x.d3, Z) - x.r2)},
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : ReprNum(R, x.L, x.p1, x.e2, x.m1, x.b2, x.d2, Z) - x.r1)},
-    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : ReprNum(R, x.L, x.p0, x.e1,  0.0, x.b1, x.d1, Z) - x.r0)},
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : ReprNum(R, x.L, x.p2, x.e3, x.m2, x.b3, x.c3, x.d3, Z) - x.r2)},
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : ReprNum(R, x.L, x.p1, x.e2, x.m1, x.b2, x.c2, x.d2, Z) - x.r1)},
+    { 'type' : 'eq', 'fun' :   BJMM3(lambda x : ReprNum(R, x.L, x.p0, x.e1,  0.0, x.m1,  0.0, x.d1, Z) - x.r0)},
     { 'type' : 'ineq', 'fun' : BJMM3(lambda x : Q*x.L - x.r0)}, # r0 <= Q*L
     { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.r0  - x.r1)},
     { 'type' : 'ineq', 'fun' : BJMM3(lambda x : x.r1  - x.r2)},
@@ -75,7 +76,7 @@ def optimize_BJMM3(q, z, R, W, max_trials, verb=True):
     { 'type' : 'eq', 'fun' : BJMM3(lambda x : 2*x.l1                + x.r0 - Q*x.L - x.l0 )}, # final list
     ]
     
-    bounds = [(0, 1-R)]+[(max(0, W-(1-R)), W)]   + [(0,W)]*3 + [(0,1)]*12 + [(0,10)]*9
+    bounds = [(0, 1-R)]+[(max(0, W-(1-R)), W)]   + [(0,W)]*3 + [(0,1)]*13 + [(0,10)]*9
     start = [0]*len(bounds)
     for l in range(len(bounds)): # randomize starting point
         start[l] = np.random.uniform(bounds[l][0],bounds[l][1])
